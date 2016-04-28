@@ -1,0 +1,37 @@
+import org.joda.time.*
+import org.openhab.core.types.*
+import org.openhab.core.library.types.*
+import org.openhab.core.library.items.*
+import org.openhab.core.items.*
+import org.openhab.core.persistence.*
+import org.openhab.model.script.actions.*
+import org.eclipse.xtext.xbase.lib.*
+import java.lang.Integer.*
+
+var Number nodeCallTimer = 4000
+
+rule "Check Status of all plugs"
+when
+	Time cron "*/30 * * * * ?"
+	//Time cron "0 */5 * * * ?"
+then
+	
+	var Number plugsOn = 0;
+
+	val statePlug1 = executeCommandLine("node ../conf/scripts/homebridge-ecoplug/PlugControl.js -a state -pn Plug1 -id ECO-7801B128 -ip 192.168.2.51 ", nodeCallTimer);
+	val statePlug2 = executeCommandLine("node ../conf/scripts/homebridge-ecoplug/PlugControl.js -a state -pn Plug2 -id ECO-78006F9E -ip 192.168.2.52 ", nodeCallTimer);
+
+	postUpdate(EcoPlug_1,statePlug1)
+	postUpdate(EcoPlug_2,statePlug2)
+	if (statePlug1 == "ON")
+		plugsOn = plugsOn + 1
+	if (statePlug2 == "ON")
+		plugsOn = plugsOn + 1
+
+	if (plugsOn == 2)
+		postUpdate(EcoPlugGroupSwitch,"ON")
+	else if (plugsOn == 0)
+		postUpdate(EcoPlugGroupSwitch,"OFF")
+	else
+		postUpdate(EcoPlugGroupSwitch,"UNSET")
+end

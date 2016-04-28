@@ -1,0 +1,5 @@
+
+String		EcoPlugGroupSwitch				"ALL PLUGS"														<poweroutlet>
+Group			EcoPlugGroup_1
+Switch		EcoPlug_1									"Jake's Room"													<poweroutlet>				(EcoPlugGroup_1)
+Switch		EcoPlug_2									"Kate's Room"													<poweroutlet>				(EcoPlugGroup_1)

@@ -1,0 +1,61 @@
+import org.joda.time.*
+import org.openhab.core.library.types.*
+import java.math.*
+
+var Number nodeCallTimer = 5000
+var String resultString
+var Number percent = 0
+
+/*** Group ***/
+rule "Handle PlugGroup: EcoPlugGroupSwitch"
+when
+	Item EcoPlugGroupSwitch received command
+then
+	var currentState = ""
+	if (EcoPlugGroupSwitch.state == "ON")
+		currentState = "ON"
+	else if (EcoPlugGroupSwitch.state == "OFF")
+		currentState = "OFF"
+	//else if (EcoPlugGroupSwitch.state == "UNSET")
+
+	if (currentState != ""){
+		executeCommandLine("node ../conf/scripts/homebridge-ecoplug/PlugControl.js -a " + currentState + " -pn Plug1 -id ECO-7801B128 -ip 192.168.2.51 ")
+		executeCommandLine("node ../conf/scripts/homebridge-ecoplug/PlugControl.js -a " + currentState + " -pn Plug2 -id ECO-78006F9E -ip 192.168.2.52 ")
+		postUpdate(EcoPlug_1, currentState)
+		postUpdate(EcoPlug_2, currentState)
+	}
+end
+
+rule "Handle Plug: EcoPlug_1"
+when
+	Item EcoPlug_1 received command ON
+	or
+	Item EcoPlug_1 received command OFF
+then
+	executeCommandLine("node ../conf/scripts/homebridge-ecoplug/PlugControl.js -a " + EcoPlug_1.state + " -pn Plug1 -id ECO-7801B128 -ip 192.168.2.51 ")
+
+	if (EcoPlug_1.state == EcoPlug_2.state){
+		if (EcoPlug_1.state == "ON")
+			postUpdate(EcoPlugGroupSwitch, "ON")
+		else if (EcoPlug_1.state == "OFF")
+			postUpdate(EcoPlugGroupSwitch, "OFF")
+	}	else
+		postUpdate(EcoPlugGroupSwitch, "UNSET")
+end
+
+rule "Handle Plug: EcoPlug_2"
+when
+	Item EcoPlug_2 received command ON
+	or
+	Item EcoPlug_2 received command OFF
+then
+	executeCommandLine("node ../conf/scripts/homebridge-ecoplug/PlugControl.js -a " + EcoPlug_2.state + " -pn Plug2 -id ECO-78006F9E -ip 192.168.2.52 ")
+
+	if (EcoPlug_2.state == EcoPlug_1.state){
+		if (EcoPlug_2.state == "ON")
+			postUpdate(EcoPlugGroupSwitch, "ON")
+		else if (EcoPlug_2.state == "OFF")
+			postUpdate(EcoPlugGroupSwitch, "OFF")
+	}	else
+		postUpdate(EcoPlugGroupSwitch, "UNSET")
+end
