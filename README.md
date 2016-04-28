@@ -11,7 +11,7 @@ This plugin allows you to remotely control the state of your Eco Plug.  It allow
 
 1. Download
 2. I put the root files in a folder called homebridge-ecoplug (here is my full path /opt/openhab/conf/scripts/homebridge-ecoplug/) 
-3. Use the files is /OpenHAB_config to setup your plugs
+3. Use the files in /OpenHAB_config to setup your plugs
 
 # Configuration
 
